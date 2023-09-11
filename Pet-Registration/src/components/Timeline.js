@@ -1,52 +1,34 @@
 import React from 'react';
-//import { Link } from 'react-router-dom';
-import './Timeline.css';
+import '../index.css';
 
-function Timeline() {
+function Timeline({ activeStep }) {
+  const stepLabels = [
+    'Owner Details',
+    'Owner Address',
+    'Pet Details',
+    'Document Details',
+    'Summary',
+  ];
+
   return (
     <div>
-
-      
-            <div className="timeline-container">
-                <div className="timeline-checkpoint">
-                    <div className="timeline-content">
-                        <span className="circle active">1</span>
-                        <span className="secondary-color">Owner Details</span>
-                    
-                    </div>
-                    <span className="line false"></span>
-                </div>
-                <div className="timeline-checkpoint">
-                    <div className="timeline-content"><span class="circle false">2</span> <span className="secondary-color">Owner Address</span> </div>
-                    <span className="line false"></span>
-                </div>
-                <div className="timeline-checkpoint">
-                    <div className="timeline-content">
-                        <span className="circle false">3</span>
-                        <span className="secondary-color">Pet Details</span>
-                    </div>
-                    <span className="line false"></span>
-                </div>
-                <div className="timeline-checkpoint">
-                    <div className="timeline-content">
-                        <span className="circle false">4</span>
-                        <span className="secondary-color">Document Details</span>
-                    </div>
-                    <span className="line false"></span>
-                </div>
-                <div className="timeline-checkpoint">
-                    <div className="timeline-content">
-                        <span className="circle false">5</span>
-                        <span className="secondary-color">Summary</span>
-                    </div>
-                
-                </div>
+      <div className="timeline-container">
+        {stepLabels.map((label, index) => (
+          <div className="timeline-checkpoint" key={index}>
+            <div className="timeline-content">
+              <span className={`circle ${activeStep >= index + 1 ? 'active' : ''}`}>
+                {index + 1}
+              </span>
+              <span className={`secondary-color ${activeStep >= index + 1 ? 'active' : ''}`}>
+                {label}
+              </span>
             </div>
-
-
-
-
-
+            {index < stepLabels.length - 1 && (
+              <span className={`line ${activeStep > index + 1 ? 'active' : ''}`}></span>
+            )}
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

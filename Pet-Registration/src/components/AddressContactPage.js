@@ -1,24 +1,47 @@
 import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import Timeline from './Timeline';
+import '../index.css';
+import { useGlobalState } from './GlobalStateContext';
 
 const AddressContactPage = () => {
   const history = useHistory();
+  const [activeStep, setActiveStep] = useState(2);
+  const { state, dispatch } = useGlobalState(); // Use Globalstate to maintain the form data
 
-  const [houseNumber, setHouseNumber] = useState('');
-  const [streetName, setStreetName] = useState('');
-  const [locality, setLocality] = useState('');
-  const [landmark, setLandmark] = useState('');
-  const [city, setCity] = useState('');
-  const [state, setState] = useState('');
-  const [pincode, setPincode] = useState('');
+  // Destructure form data from global state
+  const { formData } = state;
 
-  const handleFormSubmit = (event) => {
+  const handleNextClick = (event) => {
     event.preventDefault();
-    // Handle form submission logic here
+    setActiveStep(3);
+
+    // Form Validation
+    if (!validateForm()) {
+      return;
+    }
+
+    dispatch({
+      type: 'UPDATE_FORM_DATA',
+      payload: formData,
+    });
 
     // Redirect to the next page
     history.push('/pet-details');
+  };
+
+  const validateForm = () => {
+    // Implement form validation logic here
+
+    // Check if pincode is exactly 6 digits
+    if (formData.pincode.length !== 6 || !/^\d+$/.test(formData.pincode)) {
+      alert('Please enter a valid 6-digit pincode.');
+      return false;
+    }
+
+    // Add more validation checks for other fields as needed
+
+    return true;
   };
 
   const styles = {
@@ -27,63 +50,76 @@ const AddressContactPage = () => {
       flexDirection: 'column',
       alignItems: 'center',
       justifyContent: 'center',
-      height: '100vh',
-      background: '#f3e2e2',
+      minHeight: '115vh',
+      background: '#f1f1f1',
+      padding: '20px',
+      overflow: 'auto',
     },
     heading: {
-      fontSize: '24px',
+      fontSize: '28px',
       fontWeight: 'bold',
       color: '#333',
       marginBottom: '20px',
+      textAlign: 'center',
     },
     form: {
-      width: '80%',
+      width: '100%',
       maxWidth: '600px',
+      padding: '25px',
+      background: '#fff',
+      borderRadius: '10px',
+      boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.1)',
     },
     formRow: {
       display: 'flex',
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      marginBottom: '15px',
+      flexDirection: 'column',
+      marginBottom: '20px',
     },
     label: {
-      flex: '1',
-      fontSize: '14px',
+      fontSize: '16px',
       fontWeight: 'bold',
       color: '#333',
+      marginBottom: '5px',
     },
     input: {
-      flex: '2',
       width: '100%',
-      padding: '10px',
+      padding: '12px',
       borderRadius: '5px',
       border: '1px solid #ccc',
       outline: 'none',
+      fontSize: '14px',
     },
-    button: {
+    select: {
       width: '100%',
-      padding: '10px',
+      padding: '12px',
       borderRadius: '5px',
-      border: 'none',
-      backgroundColor: '#ec6161',
-      color: '#ffffff',
-      fontWeight: 'bold',
+      border: '1px solid #ccc',
+      outline: 'none',
+      fontSize: '14px',
       cursor: 'pointer',
     },
   };
 
   return (
     <div style={styles.container}>
-      <Timeline />
-      <h2 style={styles.heading}>Address Details</h2>
-      <form style={styles.form} onSubmit={handleFormSubmit}>
+      <Timeline activeStep={activeStep} />
+      <form style={styles.form}>
         <div style={styles.formRow}>
           <label style={styles.label}>House Number:</label>
           <input
             style={styles.input}
             type="text"
-            value={houseNumber}
-            onChange={(e) => setHouseNumber(e.target.value)}
+            value={formData.houseNumber}
+            onChange={(e) =>
+              dispatch({
+                type: 'UPDATE_FORM_DATA',
+                payload: {
+                  ...formData,
+                  houseNumber: e.target.value,
+                },
+              })
+            }
+            required
           />
         </div>
 
@@ -92,8 +128,17 @@ const AddressContactPage = () => {
           <input
             style={styles.input}
             type="text"
-            value={streetName}
-            onChange={(e) => setStreetName(e.target.value)}
+            value={formData.streetName}
+            onChange={(e) =>
+              dispatch({
+                type: 'UPDATE_FORM_DATA',
+                payload: {
+                  ...formData,
+                  streetName: e.target.value,
+                },
+              })
+            }
+            required
           />
         </div>
 
@@ -102,8 +147,17 @@ const AddressContactPage = () => {
           <input
             style={styles.input}
             type="text"
-            value={locality}
-            onChange={(e) => setLocality(e.target.value)}
+            value={formData.locality}
+            onChange={(e) =>
+              dispatch({
+                type: 'UPDATE_FORM_DATA',
+                payload: {
+                  ...formData,
+                  locality: e.target.value,
+                },
+              })
+            }
+            required
           />
         </div>
 
@@ -112,8 +166,17 @@ const AddressContactPage = () => {
           <input
             style={styles.input}
             type="text"
-            value={landmark}
-            onChange={(e) => setLandmark(e.target.value)}
+            value={formData.landmark}
+            onChange={(e) =>
+              dispatch({
+                type: 'UPDATE_FORM_DATA',
+                payload: {
+                  ...formData,
+                  landmark: e.target.value,
+                },
+              })
+            }
+            required
           />
         </div>
 
@@ -122,8 +185,17 @@ const AddressContactPage = () => {
           <input
             style={styles.input}
             type="text"
-            value={city}
-            onChange={(e) => setCity(e.target.value)}
+            value={formData.city}
+            onChange={(e) =>
+              dispatch({
+                type: 'UPDATE_FORM_DATA',
+                payload: {
+                  ...formData,
+                  city: e.target.value,
+                },
+              })
+            }
+            required
           />
         </div>
 
@@ -132,8 +204,17 @@ const AddressContactPage = () => {
           <input
             style={styles.input}
             type="text"
-            value={state}
-            onChange={(e) => setState(e.target.value)}
+            value={formData.state}
+            onChange={(e) =>
+              dispatch({
+                type: 'UPDATE_FORM_DATA',
+                payload: {
+                  ...formData,
+                  state: e.target.value,
+                },
+              })
+            }
+            required
           />
         </div>
 
@@ -142,13 +223,26 @@ const AddressContactPage = () => {
           <input
             style={styles.input}
             type="text"
-            value={pincode}
-            onChange={(e) => setPincode(e.target.value)}
+            value={formData.pincode}
+            onChange={(e) =>
+              dispatch({
+                type: 'UPDATE_FORM_DATA',
+                payload: {
+                  ...formData,
+                  pincode: e.target.value,
+                },
+              })
+            }
+            required
           />
         </div>
 
-        <button style={styles.button} type="submit">
-          NEXT
+        <button
+          className="submit-bar SubmitBarInCardInDesktopView"
+          type="button"
+          onClick={handleNextClick}
+        >
+          <header>Next</header>
         </button>
       </form>
     </div>

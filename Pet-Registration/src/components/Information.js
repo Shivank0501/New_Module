@@ -1,13 +1,21 @@
 import React from 'react';
-import './Info.css';
+//import './Info.css';
+import '../index.css';
 import { useHistory } from 'react-router-dom';
 
 function Info() {
   const history = useHistory();
 
+  const isAuthenticated = /* Replace with your actual authentication logic here (e.g., check if the user is logged in) */ true;
+
   const handleNextClick = () => {
-    // Add logic to redirect the user to the next page
-    history.push('/application-details'); // Replace '/nextPage' with the actual URL of the next page
+    if (isAuthenticated) {
+      // User is authenticated, redirect to the next page
+      history.push('/application-details'); // Replace with your next page URL
+    } else {
+      // User is not authenticated, redirect to the login page
+      history.push('/login'); // Replace with your login page URL
+    }
   };
 
   return (
@@ -26,13 +34,20 @@ function Info() {
           <h2>Before You Start</h2>
           <p>Scans or photos of the following documents are mandatory to complete the application:</p>
           <ul>
-            <li>Your Photo</li>
-            <li>Pet Photo</li>
-            <li>Aadhar Card</li>
-            <li>Vaccination Certificate</li>
+            
+            <li>1. Pet Photo</li> 
+            <li>2. Adhar Card</li>
+            <li>3. Vaccination Certificate</li>
+            <li>4. Your Photo</li>
+            
+           
           </ul>
         </section>
-        <button className="next-button" onClick={handleNextClick}>Next</button>
+
+        <button className="submit-bar SubmitBarInCardInDesktopView" onClick={handleNextClick}>
+          <header>Next</header>
+        </button>
+        
       </div>
     </div>
   );

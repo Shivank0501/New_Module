@@ -1,24 +1,53 @@
 import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import 'bootstrap/dist/css/bootstrap.css';
 import Timeline from './Timeline';
+import '../index.css';
+import { useGlobalState } from './GlobalStateContext';
 
 const ApplicationDetails = () => {
   const history = useHistory();
+  const [activeStep, setActiveStep] = useState(1);
+  const { state, dispatch } = useGlobalState(); // Use Globalstate to maintain the form data
 
-  const [title, setTitle] = useState('');
-  const [name, setName] = useState('');
-  const [adharNumber, setAdharNumber] = useState('');
-  const [fatherHusbandName, setFatherHusbandName] = useState('');
-  const [mobileNumber, setMobileNumber] = useState('');
-  const [emailAddress, setEmailAddress] = useState('');
+  // Destructure form data from global state
+  const { formData } = state;
 
-  const handleFormSubmit = (event) => {
+  const handleNextClick = (event) => {
     event.preventDefault();
-    // Handle form submission logic here
+    setActiveStep(2);
+
+    // Form Validation
+    if (!validateForm()) {
+      return;
+    }
+
+    dispatch({
+      type: 'UPDATE_FORM_DATA',
+      payload: formData,
+    });
 
     // Redirect to the next page
     history.push('/address-contact');
+  };
+
+  const validateForm = () => {
+   
+
+    // Check if Aadhar number is exactly 12 digits
+    if (formData.adharNumber.length !== 12 || !/^\d+$/.test(formData.adharNumber)) {
+      alert('Please enter a valid 12-digit Aadhar number.');
+      return false;
+    }
+
+    // Check if mobile number is exactly 10 digits
+    if (formData.mobileNumber.length !== 10 || !/^\d+$/.test(formData.mobileNumber)) {
+      alert('Please enter a valid 10-digit mobile number.');
+      return false;
+    }
+
+    // Add more validation checks for other fields as needed
+
+    return true;
   };
 
   const styles = {
@@ -27,90 +56,78 @@ const ApplicationDetails = () => {
       flexDirection: 'column',
       alignItems: 'center',
       justifyContent: 'center',
-      height: '115vh',
-      background: '#f3e2e2',
+      minHeight: '115vh',
+      background: '#f1f1f1',
+      padding: '20px',
       overflow: 'auto',
     },
     heading: {
-      fontSize: '24px',
+      fontSize: '28px',
       fontWeight: 'bold',
       color: '#333',
       marginBottom: '20px',
+      textAlign: 'center',
     },
     form: {
-      width: '80%',
+      width: '100%',
       maxWidth: '600px',
+      padding: '25px',
+      background: '#fff',
+      borderRadius: '10px',
+      boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.1)',
     },
     formRow: {
       display: 'flex',
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      marginBottom: '15px',
+      flexDirection: 'column',
+      marginBottom: '20px',
     },
     label: {
-      flex: '1',
-      fontSize: '14px',
+      fontSize: '16px',
       fontWeight: 'bold',
       color: '#333',
+      marginBottom: '5px',
     },
     input: {
-      flex: '2',
       width: '100%',
-      padding: '10px',
+      padding: '12px',
       borderRadius: '5px',
       border: '1px solid #ccc',
       outline: 'none',
+      fontSize: '14px',
     },
     select: {
-      flex: '2',
       width: '100%',
-      padding: '10px',
+      padding: '12px',
       borderRadius: '5px',
       border: '1px solid #ccc',
       outline: 'none',
+      fontSize: '14px',
       cursor: 'pointer',
     },
-    button: {
-      width: '100%',
-      padding: '10px',
-      borderRadius: '5px',
-      border: 'none',
-      backgroundColor: '#ec6161',
-      color: '#ffffff',
-      fontWeight: 'bold',
-      cursor: 'pointer',
-    },
-    /*info {
-      text-align: "center",
-      backgroundColor : "#ffffff",
-      borderRadius: "10px",
-      box-shadow: "0px 4px 6px rgba(0, 0, 0, 0.1)",
-      padding: "30px",
-      max-width: "800px",
-      width: "90%",
-    },*/
-  };
-
-  return (
-    <div style={styles.container}>.
-    <Timeline />
-    
-    
-      
-    
-
-    
-      <h2 style={styles.heading}>Welcome to Pet Registration</h2>
-      <h3 style={{ color: '#666', marginBottom: '20px' }}>Personal Details</h3>
-      <form style={styles.form} onSubmit={handleFormSubmit}>
+   };
+  
+  
+   return (
+    <div style={styles.container}>
+      <Timeline activeStep={activeStep} />
+      <form style={styles.form}>
         <div style={styles.formRow}>
-
           <label style={styles.label}>Title:</label>
           <select
             style={styles.select}
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
+            value={formData.title}
+            onChange={(e) =>
+              dispatch({
+                type: 'UPDATE_FORM_DATA',
+                payload: {
+                  ...formData,
+                  title: e.target.value,
+                },
+              })
+            }
+            required
           >
+            
             <option value="Mr.">Mr.</option>
             <option value="Ms.">Ms.</option>
             <option value="Mrs.">Mrs.</option>
@@ -122,18 +139,36 @@ const ApplicationDetails = () => {
           <input
             style={styles.input}
             type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
+            value={formData.name}
+            onChange={(e) =>
+              dispatch({
+                type: 'UPDATE_FORM_DATA',
+                payload: {
+                  ...formData,
+                  name: e.target.value,
+                },
+              })
+            }
+            required
           />
         </div>
 
         <div style={styles.formRow}>
-          <label style={styles.label}>Adhar Number:</label>
+          <label style={styles.label}>Aadhar Number:</label>
           <input
             style={styles.input}
             type="text"
-            value={adharNumber}
-            onChange={(e) => setAdharNumber(e.target.value)}
+            value={formData.adharNumber}
+            onChange={(e) =>
+              dispatch({
+                type: 'UPDATE_FORM_DATA',
+                payload: {
+                  ...formData,
+                  adharNumber: e.target.value,
+                },
+              })
+            }
+            required
           />
         </div>
 
@@ -142,40 +177,67 @@ const ApplicationDetails = () => {
           <input
             style={styles.input}
             type="text"
-            value={fatherHusbandName}
-            onChange={(e) => setFatherHusbandName(e.target.value)}
+            value={formData.fatherHusbandName}
+            onChange={(e) =>
+              dispatch({
+                type: 'UPDATE_FORM_DATA',
+                payload: {
+                  ...formData,
+                  fatherHusbandName: e.target.value,
+                },
+              })
+            }
+            required
           />
         </div>
 
         <div style={styles.formRow}>
-        <label style={styles.label}>Mobile Number:</label>
-        <input
-          style={styles.input}
-          type="tel"
-          value={mobileNumber}
-          onChange={(e) => setMobileNumber(e.target.value)}
-          //required
-        />
+          <label style={styles.label}>Mobile Number:</label>
+          <input
+            style={styles.input}
+            type="tel"
+            value={formData.mobileNumber}
+            onChange={(e) =>
+              dispatch({
+                type: 'UPDATE_FORM_DATA',
+                payload: {
+                  ...formData,
+                  mobileNumber: e.target.value,
+                },
+              })
+            }
+            required
+          />
         </div>
 
         <div style={styles.formRow}>
-        <label style={styles.label}>Email Address:</label>
-        <input
-          style={styles.input}
-          type="email"
-          value={emailAddress}
-          onChange={(e) => setEmailAddress(e.target.value)}
-          //required
-        />
+          <label style={styles.label}>Email Address:</label>
+          <input
+            style={styles.input}
+            type="email"
+            value={formData.emailAddress}
+            onChange={(e) =>
+              dispatch({
+                type: 'UPDATE_FORM_DATA',
+                payload: {
+                  ...formData,
+                  emailAddress: e.target.value,
+                },
+              })
+            }
+            required
+          />
         </div>
 
-        <button style={styles.button} type="submit">
-          Next
+        <button
+          className="submit-bar SubmitBarInCardInDesktopView"
+          type="button"
+          onClick={handleNextClick}
+        >
+          <header>Next</header>
         </button>
       </form>
     </div>
-    
-  
   );
 };
 

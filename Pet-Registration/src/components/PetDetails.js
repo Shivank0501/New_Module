@@ -1,50 +1,39 @@
 import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import Timeline from './Timeline';
-//import './Timeline.css';
+import '../index.css';
+import { useGlobalState } from './GlobalStateContext';
 
-const PetDetailPage = () => {
+const PetDetails = () => {
   const history = useHistory();
+  const [activeStep, setActiveStep] = useState(3);
+  const { state, dispatch } = useGlobalState(); // Use Globalstate to maintain the form data
 
-  const [petType, setPetType] = useState('');
-  const [petName, setPetName] = useState('');
-  const [sex, setSex] = useState('');
-  const [age, setAge] = useState('');
-  const [purchaseDate, setPurchaseDate] = useState('');
-  const [lastVaccinatedDate, setLastVaccinatedDate] = useState('');
-  const [doctorName, setDoctorName] = useState('');
-  const [doctorPhoneNumber, setDoctorPhoneNumber] = useState('');
-  const [doctorEmail, setDoctorEmail] = useState('');
+  // Destructure form data from global state
+  const { formData } = state;
 
-  const [breedOptions, setBreedOptions] = useState([]);
-  const [selectedBreed, setSelectedBreed] = useState('');
+  const handleNextClick = (event) => {
+    event.preventDefault();
+    setActiveStep(4);
 
-  const handlePetTypeChange = (e) => {
-    setPetType(e.target.value);
-    setSelectedBreed('');
-
-    if (e.target.value === 'dog') {
-      setBreedOptions([
-        'Labrador Retriever',
-        'German Shepherd',
-        'Golden Retriever',
-        // Add more dog breeds here
-      ]);
-    } else if (e.target.value === 'cat') {
-      setBreedOptions([
-        'Bombay Cat',
-        'Himalayan Cat',
-        'Siamese Cat',
-        // Add more cat breeds here
-      ]);
+    // Form Validation
+    if (!validateForm()) {
+      return;
     }
+
+    dispatch({
+      type: 'UPDATE_FORM_DATA',
+      payload: formData,
+    });
+
+    // Redirect to the next page
+    history.push('/file-upload');
   };
 
-  const handleFormSubmit = (event) => {
-    event.preventDefault();
-    // Handle form submission logic here
+  const validateForm = () => {
+    // Add your form validation logic here
 
-    history.push('/file-upload');
+    return true;
   };
 
   const styles = {
@@ -53,73 +42,75 @@ const PetDetailPage = () => {
       flexDirection: 'column',
       alignItems: 'center',
       justifyContent: 'center',
-      height: '135vh', // You can adjust the height as needed
-      background: '#f3e2e2',
-      overflow: 'auto', // Enable scrolling
+      minHeight: '115vh',
+      background: '#f1f1f1',
+      padding: '20px',
+      overflow: 'auto',
     },
     heading: {
-      fontSize: '24px',
+      fontSize: '28px',
       fontWeight: 'bold',
       color: '#333',
       marginBottom: '20px',
+      textAlign: 'center',
     },
     form: {
-      width: '80%',
+      width: '100%',
       maxWidth: '600px',
+      padding: '25px',
+      background: '#fff',
+      borderRadius: '10px',
+      boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.1)',
     },
     formRow: {
       display: 'flex',
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      marginBottom: '15px',
+      flexDirection: 'column',
+      marginBottom: '20px',
     },
     label: {
-      flex: '1',
-      fontSize: '14px',
+      fontSize: '16px',
       fontWeight: 'bold',
       color: '#333',
+      marginBottom: '5px',
     },
     input: {
-      flex: '2',
       width: '100%',
-      padding: '10px',
+      padding: '12px',
       borderRadius: '5px',
       border: '1px solid #ccc',
       outline: 'none',
+      fontSize: '14px',
     },
     select: {
-      flex: '2',
       width: '100%',
-      padding: '10px',
+      padding: '12px',
       borderRadius: '5px',
       border: '1px solid #ccc',
       outline: 'none',
-      cursor: 'pointer',
-    },
-    button: {
-      width: '100%',
-      padding: '10px',
-      borderRadius: '5px',
-      border: 'none',
-      backgroundColor: '#ec6161',
-      color: '#ffffff',
-      fontWeight: 'bold',
+      fontSize: '14px',
       cursor: 'pointer',
     },
   };
 
   return (
     <div style={styles.container}>
-    <Timeline />
-      <h2 style={styles.heading}>Pet Details</h2>
-      <form style={styles.form} onSubmit={handleFormSubmit}>
+      <Timeline activeStep={activeStep} />
+      <form style={styles.form}>
         <div style={styles.formRow}>
           <label style={styles.label}>Pet Type:</label>
           <select
             style={styles.select}
-            value={petType}
-            onChange={handlePetTypeChange}
-           // required
+            value={formData.petType}
+            onChange={(e) =>
+              dispatch({
+                type: 'UPDATE_FORM_DATA',
+                payload: {
+                  ...formData,
+                  petType: e.target.value,
+                },
+              })
+            }
+            required
           >
             <option value="">Select Pet Type</option>
             <option value="dog">Dog</option>
@@ -127,21 +118,54 @@ const PetDetailPage = () => {
           </select>
         </div>
 
-        {petType && (
+        {formData.petType === 'cat' && (
           <div style={styles.formRow}>
             <label style={styles.label}>Breed:</label>
             <select
               style={styles.select}
-              value={selectedBreed}
-              onChange={(e) => setSelectedBreed(e.target.value)}
-              //required
+              value={formData.selectedBreed}
+              onChange={(e) =>
+                dispatch({
+                  type: 'UPDATE_FORM_DATA',
+                  payload: {
+                    ...formData,
+                    selectedBreed: e.target.value,
+                  },
+                })
+              }
+              required
             >
               <option value="">Select Breed</option>
-              {breedOptions.map((breed) => (
-                <option key={breed} value={breed}>
-                  {breed}
-                </option>
-              ))}
+              <option value="Bombay Cat">Bombay Cat</option>
+              <option value="Himalayan Cat">Himalayan Cat</option>
+              <option value="Siamese Cat">Siamese Cat</option>
+              {/* Add more cat breed options here */}
+            </select>
+          </div>
+        )}
+
+        {formData.petType === 'dog' && (
+          <div style={styles.formRow}>
+            <label style={styles.label}>Breed:</label>
+            <select
+              style={styles.select}
+              value={formData.selectedBreed}
+              onChange={(e) =>
+                dispatch({
+                  type: 'UPDATE_FORM_DATA',
+                  payload: {
+                    ...formData,
+                    selectedBreed: e.target.value,
+                  },
+                })
+              }
+              required
+            >
+              <option value="">Select Breed</option>
+              <option value="Labrador Retriever">Labrador Retriever</option>
+              <option value="German Shepherd">German Shepherd</option>
+              <option value="Golden Retriever">Golden Retriever</option>
+              {/* Add more dog breed options here */}
             </select>
           </div>
         )}
@@ -151,9 +175,17 @@ const PetDetailPage = () => {
           <input
             style={styles.input}
             type="text"
-            value={petName}
-            onChange={(e) => setPetName(e.target.value)}
-           // required
+            value={formData.petName}
+            onChange={(e) =>
+              dispatch({
+                type: 'UPDATE_FORM_DATA',
+                payload: {
+                  ...formData,
+                  petName: e.target.value,
+                },
+              })
+            }
+            required
           />
         </div>
 
@@ -161,9 +193,17 @@ const PetDetailPage = () => {
           <label style={styles.label}>Sex:</label>
           <select
             style={styles.select}
-            value={sex}
-            onChange={(e) => setSex(e.target.value)}
-            //required
+            value={formData.sex}
+            onChange={(e) =>
+              dispatch({
+                type: 'UPDATE_FORM_DATA',
+                payload: {
+                  ...formData,
+                  sex: e.target.value,
+                },
+              })
+            }
+            required
           >
             <option value="">Select Sex</option>
             <option value="male">Male</option>
@@ -176,9 +216,17 @@ const PetDetailPage = () => {
           <input
             style={styles.input}
             type="text"
-            value={age}
-            onChange={(e) => setAge(e.target.value)}
-            //required
+            value={formData.age}
+            onChange={(e) =>
+              dispatch({
+                type: 'UPDATE_FORM_DATA',
+                payload: {
+                  ...formData,
+                  age: e.target.value,
+                },
+              })
+            }
+            required
           />
         </div>
 
@@ -187,9 +235,17 @@ const PetDetailPage = () => {
           <input
             style={styles.input}
             type="date"
-            value={purchaseDate}
-            onChange={(e) => setPurchaseDate(e.target.value)}
-            //required
+            value={formData.purchaseDate}
+            onChange={(e) =>
+              dispatch({
+                type: 'UPDATE_FORM_DATA',
+                payload: {
+                  ...formData,
+                  purchaseDate: e.target.value,
+                },
+              })
+            }
+            required
           />
         </div>
 
@@ -198,9 +254,17 @@ const PetDetailPage = () => {
           <input
             style={styles.input}
             type="date"
-            value={lastVaccinatedDate}
-            onChange={(e) => setLastVaccinatedDate(e.target.value)}
-            //required
+            value={formData.lastVaccinatedDate}
+            onChange={(e) =>
+              dispatch({
+                type: 'UPDATE_FORM_DATA',
+                payload: {
+                  ...formData,
+                  lastVaccinatedDate: e.target.value,
+                },
+              })
+            }
+            required
           />
         </div>
 
@@ -209,9 +273,17 @@ const PetDetailPage = () => {
           <input
             style={styles.input}
             type="text"
-            value={doctorName}
-            onChange={(e) => setDoctorName(e.target.value)}
-            //required
+            value={formData.doctorName}
+            onChange={(e) =>
+              dispatch({
+                type: 'UPDATE_FORM_DATA',
+                payload: {
+                  ...formData,
+                  doctorName: e.target.value,
+                },
+              })
+            }
+            required
           />
         </div>
 
@@ -220,9 +292,17 @@ const PetDetailPage = () => {
           <input
             style={styles.input}
             type="tel"
-            value={doctorPhoneNumber}
-            onChange={(e) => setDoctorPhoneNumber(e.target.value)}
-           // required
+            value={formData.doctorPhoneNumber}
+            onChange={(e) =>
+              dispatch({
+                type: 'UPDATE_FORM_DATA',
+                payload: {
+                  ...formData,
+                  doctorPhoneNumber: e.target.value,
+                },
+              })
+            }
+            required
           />
         </div>
 
@@ -231,18 +311,30 @@ const PetDetailPage = () => {
           <input
             style={styles.input}
             type="email"
-            value={doctorEmail}
-            onChange={(e) => setDoctorEmail(e.target.value)}
-           // required
+            value={formData.doctorEmail}
+            onChange={(e) =>
+              dispatch({
+                type: 'UPDATE_FORM_DATA',
+                payload: {
+                  ...formData,
+                  doctorEmail: e.target.value,
+                },
+              })
+            }
+            required
           />
         </div>
 
-        <button style={styles.button} type="submit">
-          Next
+        <button
+          className="submit-bar SubmitBarInCardInDesktopView"
+          type="button"
+          onClick={handleNextClick}
+        >
+          <header>Next</header>
         </button>
       </form>
     </div>
   );
 };
 
-export default PetDetailPage;
+export default PetDetails;
